@@ -5,6 +5,5 @@
   "minAppVersion": "1.5.0",
   "description": "Focused popup speed-reader for Markdown and text files with ORP highlighting.",
   "author": "Rapid Reader Contributors",
-  "authorUrl": "https://example.com",
   "isDesktopOnly": false
 }

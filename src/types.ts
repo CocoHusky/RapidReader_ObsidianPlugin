@@ -13,6 +13,7 @@ export interface RapidReaderSettings {
   showCenterGuide: boolean;
   showSidePanelDefault: boolean;
   punctuationPause: PunctuationPause;
+  sentencePauseMultiplier: number;
   replaceCodeBlocks: boolean;
   replaceInlineCode: boolean;
   replaceUrlsOnSimplify: boolean;

@@ -98,6 +98,13 @@ function applyReaderNormalization(text: string, settings: RapidReaderSettings): 
       .replace(/\s+([,.;:!?])/g, "$1");
   }
 
+
+  out = out
+    .replace(/([,.;:!?]){2,}/g, "$1")
+    .replace(/\.\s*,/g, ".")
+    .replace(/,\s*\./g, ".")
+    .replace(/\.\s*\./g, ".");
+
   out = out.replace(/\s{2,}/g, " ");
   return out;
 }

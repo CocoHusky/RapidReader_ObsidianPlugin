@@ -14,7 +14,8 @@ Rapid Reader is a focused tabbed speed-reading plugin for Obsidian. It reads Mar
 - Side panel with cleaned full text and live paragraph highlight
 - Playback controls: restart, step, jump ±10, speed slider, progress slider
 - Persistent settings and remembered position per file
-- Speed shown as `w/min` below the speed slider and reading progress shown as `current/total`
+- Speed shown as `w/min` below the left slider and reading progress shown as `current/total` below the right slider
+- Reader header includes a Config button that opens plugin settings
 
 ## Version 1 limitations
 
@@ -25,6 +26,28 @@ Not included in v1:
 - Web page/URL ingestion
 - EPUB support
 - OCR
+
+## Publish to Community Plugins
+
+This repository includes the submission prerequisites from the Obsidian guide:
+
+- `README.md`
+- `LICENSE`
+- `manifest.json`
+- `versions.json` (maps plugin versions to minimum Obsidian versions)
+
+Release workflow (per Obsidian docs):
+
+1. Build with `npm run build` to produce `main.js`.
+2. Ensure `manifest.json` version matches the release tag (SemVer `x.y.z`).
+3. Update `versions.json` with `"<plugin-version>": "<minAppVersion>"`.
+4. Create a GitHub release and attach:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css` (optional but recommended)
+5. Submit the plugin by adding an entry to `obsidianmd/obsidian-releases` `community-plugins.json` and opening a PR named `Add plugin: Rapid Reader`.
+
+Reference: Obsidian Developer Docs → Plugins → Releasing → Submit your plugin.
 
 ## Development installation
 
@@ -71,6 +94,7 @@ npm run build
 - Show center guide
 - Show full text side panel by default
 - Punctuation pause strength (`off/light/normal/strong`)
+- Sentence pause multiplier (1.0 to 10.0)
 - Replace code blocks with `[code block]`
 - Replace inline code with `[code]`
 - Replace URLs with `[link]` during simplify
@@ -107,6 +131,10 @@ npm run build
 - Better Markdown parsing later
 - Advanced split/layout presets later
 - Optional LLM summary mode later (not in version 1)
+
+## Cleanup spec
+
+- See detailed normalization and examples in `docs/CLEANUP_PROCESS.md`.
 
 ## Security notes
 

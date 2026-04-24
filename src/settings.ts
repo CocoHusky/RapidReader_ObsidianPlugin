@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: RapidReaderSettings = {
   showCenterGuide: true,
   showSidePanelDefault: true,
   punctuationPause: "normal",
+  sentencePauseMultiplier: 1.6,
   replaceCodeBlocks: true,
   replaceInlineCode: true,
   replaceUrlsOnSimplify: true,
@@ -104,6 +105,11 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
+
+    new Setting(containerEl).setName("Sentence pause multiplier").setDesc("Multiplier applied to delays at sentence endings (.) from 1 to 10.").addSlider((s) => s.setLimits(1, 10, 0.1).setValue(this.plugin.settings.sentencePauseMultiplier).setDynamicTooltip().onChange(async (value) => {
+      this.plugin.settings.sentencePauseMultiplier = value;
+      await this.plugin.saveSettings();
+    }));
     new Setting(containerEl).setName("Replace code blocks").addToggle((tg) => tg.setValue(this.plugin.settings.replaceCodeBlocks).onChange(async (value) => {
       this.plugin.settings.replaceCodeBlocks = value;
       await this.plugin.saveSettings();

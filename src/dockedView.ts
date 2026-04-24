@@ -79,6 +79,8 @@ export class RapidReaderDockedView extends ItemView {
 
     const topActions = top.createDiv({ cls: "rapid-reader-top-actions" });
     this.headerInfoEl = topActions.createDiv({ cls: "rapid-reader-header-info" });
+    const configBtn = topActions.createEl("button", { text: "Config", cls: "rapid-reader-help-btn" });
+    configBtn.addEventListener("click", () => this.app.setting.openTabById(this.plugin.manifest.id));
 
     const body = root.createDiv({ cls: "rapid-reader-body" });
     const readerPane = body.createDiv({ cls: "rapid-reader-pane" });
@@ -110,7 +112,9 @@ export class RapidReaderDockedView extends ItemView {
     btn("Next", () => this.move(1));
     btn("Forward 10", () => this.move(10));
 
-    const speedWrap = root.createDiv({ cls: "rapid-reader-slider-wrap" });
+    const sliderRow = root.createDiv({ cls: "rapid-reader-slider-row" });
+
+    const speedWrap = sliderRow.createDiv({ cls: "rapid-reader-slider-wrap" });
     this.speedEl = speedWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.speedEl.min = String(this.plugin.settings.minWpm);
     this.speedEl.max = String(this.plugin.getMaxWpm());
@@ -119,7 +123,7 @@ export class RapidReaderDockedView extends ItemView {
     this.speedEl.addEventListener("input", () => this.setWpm(Number(this.speedEl.value)));
     this.speedInfoEl = speedWrap.createDiv({ cls: "rapid-reader-slider-label" });
 
-    const progressWrap = root.createDiv({ cls: "rapid-reader-slider-wrap" });
+    const progressWrap = sliderRow.createDiv({ cls: "rapid-reader-slider-wrap" });
     this.progressEl = progressWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.progressEl.min = "0";
     this.progressEl.max = String(Math.max(0, this.tokens.length - 1));
@@ -209,7 +213,7 @@ export class RapidReaderDockedView extends ItemView {
     const token = this.tokens[this.index];
     this.move(1);
     const next = this.tokens[this.index + 1];
-    const delay = calculateDelay(token, next, this.wpm, this.plugin.settings.punctuationPause);
+    const delay = calculateDelay(token, next, this.wpm, this.plugin.settings.punctuationPause, this.plugin.settings.sentencePauseMultiplier);
     this.timeoutId = window.setTimeout(this.tick, delay);
   };
 
