@@ -89,6 +89,8 @@ export class RapidReaderDockedView extends ItemView {
   }
 
   private renderShell(): void {
+    this.containerEl.empty();
+    this.containerEl.addClass("rapid-reader-docked-root");
     const root = this.containerEl.createDiv({ cls: "rapid-reader-modal" });
 
     const top = root.createDiv({ cls: "rapid-reader-top" });

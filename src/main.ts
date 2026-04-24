@@ -161,7 +161,7 @@ export default class RapidReaderPlugin extends Plugin {
         path: activeFile.path,
         name: `${activeFile.name} (selection)`,
         rawText: selected
-      });
+      }, target);
       return;
     }
 
@@ -226,7 +226,7 @@ export default class RapidReaderPlugin extends Plugin {
       new PreflightModal(this.app, analysis.issues, (decision) => {
         if (decision === "cancel") return;
         openReader(decision === "simplify");
-      });
+      }).open();
       return;
     }
 
