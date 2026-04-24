@@ -4,7 +4,7 @@ import { splitWordByOrp } from "./orp";
 import { calculateDelay, estimateRemainingMs } from "./timing";
 import { ReaderToken } from "./types";
 
-interface ReaderSession {
+export interface ReaderSession {
   sourceName: string;
   sourcePath: string;
   text: string;
@@ -81,8 +81,21 @@ export class RapidReaderModal extends Modal {
 
   onOpen(): void {
     this.modalEl.addClass("rapid-reader-modal-wrap");
+    if (this.plugin.settings.fullWidthModal) {
+      this.modalEl.style.setProperty("--rapid-reader-modal-width", "min(92vw, 1800px)");
+      this.modalEl.style.setProperty("--rapid-reader-modal-max-width", "1800px");
+      this.modalEl.style.setProperty("--rapid-reader-modal-height", "min(82vh, 960px)");
+      this.modalEl.style.setProperty("--rapid-reader-modal-max-height", "960px");
+    } else {
+      this.modalEl.style.setProperty("--rapid-reader-modal-width", "min(80vw, 1200px)");
+      this.modalEl.style.setProperty("--rapid-reader-modal-max-width", "1200px");
+      this.modalEl.style.setProperty("--rapid-reader-modal-height", "min(76vh, 860px)");
+      this.modalEl.style.setProperty("--rapid-reader-modal-max-height", "860px");
+    }
     this.contentEl.empty();
     this.buildLayout();
+    this.modalEl.tabIndex = -1;
+    this.modalEl.focus();
     this.renderSidePanel();
     this.renderCurrentWord();
     this.applyTheme();
@@ -92,7 +105,7 @@ export class RapidReaderModal extends Modal {
 
   onClose(): void {
     this.stop();
-    if (this.keyHandler) window.removeEventListener("keydown", this.keyHandler, true);
+    if (this.keyHandler) this.modalEl.removeEventListener("keydown", this.keyHandler, true);
     this.contentEl.empty();
   }
 
@@ -181,11 +194,11 @@ export class RapidReaderModal extends Modal {
       }
     };
 
-    window.addEventListener("keydown", this.keyHandler, true);
+    this.modalEl.addEventListener("keydown", this.keyHandler, true);
   }
 
   private handleKeydown(e: KeyboardEvent): boolean {
-    if (e.key === " ") return this.togglePlay(), true;
+    if (e.key === " " || e.code === "Space") return this.togglePlay(), true;
     if (e.key.toLowerCase() === "r") return this.jumpTo(0), true;
     if (e.key.toLowerCase() === "h") return new RapidReaderHelpModal(this.app).open(), true;
     if (e.key === ",") return this.app.setting.openTabById(this.plugin.manifest.id), true;
@@ -223,6 +236,7 @@ export class RapidReaderModal extends Modal {
     this.wordBeforeEl.setText(parts.before);
     this.wordOrpEl.setText(parts.orp);
     this.wordAfterEl.setText(parts.after);
+    this.updateWordScale(token.text);
 
     this.progressEl.value = String(this.index);
     this.updateHeader();
@@ -232,6 +246,21 @@ export class RapidReaderModal extends Modal {
       this.plugin.settings.progressByPath[this.session.sourcePath] = this.index;
       this.plugin.saveSettings();
     }
+  }
+
+
+  private updateWordScale(word: string): void {
+    const root = this.contentEl.querySelector(".rapid-reader-modal") as HTMLElement | null;
+    if (!root) return;
+
+    const core = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+    const length = Math.max(1, core.length);
+
+    let factor = 1;
+    if (length > 12) factor = Math.max(0.62, 12 / length);
+    if (length > 20) factor = Math.max(0.5, 10 / length);
+
+    root.style.setProperty("--rapid-reader-active-font-size", `calc(var(--rapid-reader-font-size) * ${factor.toFixed(3)})`);
   }
 
   private updateHeader(): void {
