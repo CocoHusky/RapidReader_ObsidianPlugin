@@ -1,9 +1,8 @@
 import { App, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 import { RapidReaderFileSuggestModal, isSupportedFile } from "./filePicker";
-import { RapidReaderModal, ReaderSession } from "./readerModal";
+import { ReaderSession, RapidReaderSettings } from "./types";
 import { DEFAULT_SETTINGS, RapidReaderSettingTab } from "./settings";
 import { analyzeReadability, cleanMarkdownText, simplifyText, tokenizeText } from "./textProcessing";
-import { RapidReaderSettings } from "./types";
 import { RAPID_READER_DOCKED_VIEW, RapidReaderDockedView } from "./dockedView";
 
 interface SourcePayload {
@@ -43,13 +42,8 @@ class PreflightModal extends Modal {
   }
 }
 
-
 class RibbonActionModal extends Modal {
-  constructor(
-    app: App,
-    private readonly onCurrent: () => void,
-    private readonly onChoose: () => void
-  ) {
+  constructor(app: App, private readonly onCurrent: () => void, private readonly onChoose: () => void) {
     super(app);
   }
 
@@ -79,40 +73,29 @@ export default class RapidReaderPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadSettings();
+
+    this.registerView(RAPID_READER_DOCKED_VIEW, (leaf) => new RapidReaderDockedView(leaf, this));
+
     this.addRibbonIcon("book-open", "Open Rapid Reader", () => {
-      new RibbonActionModal(this.app, () => this.openForCurrentFile(this.settings.defaultOpenMode), () => this.openFilePicker(this.settings.defaultOpenMode)).open();
+      new RibbonActionModal(this.app, () => this.openForCurrentFile(), () => this.openFilePicker()).open();
     });
 
     this.addCommand({
       id: "rapid-reader-open-current",
       name: "Open Rapid Reader for current file",
-      callback: () => this.openForCurrentFile(this.settings.defaultOpenMode)
+      callback: () => this.openForCurrentFile()
     });
 
     this.addCommand({
       id: "rapid-reader-pick-file",
       name: "Choose file for Rapid Reader",
-      callback: () => this.openFilePicker(this.settings.defaultOpenMode)
+      callback: () => this.openFilePicker()
     });
 
     this.addCommand({
       id: "rapid-reader-open-settings",
       name: "Open Rapid Reader settings",
       callback: () => this.app.setting.openTabById(this.manifest.id)
-    });
-
-    this.registerView(RAPID_READER_DOCKED_VIEW, (leaf) => new RapidReaderDockedView(leaf, this));
-
-    this.addCommand({
-      id: "rapid-reader-open-current-docked",
-      name: "Open Rapid Reader for current file (Docked)",
-      callback: () => this.openForCurrentFile("docked")
-    });
-
-    this.addCommand({
-      id: "rapid-reader-pick-file-docked",
-      name: "Choose file for Rapid Reader (Docked)",
-      callback: () => this.openFilePicker("docked")
     });
 
     this.addSettingTab(new RapidReaderSettingTab(this.app, this));
@@ -135,15 +118,14 @@ export default class RapidReaderPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-
-  openFilePicker(target: "modal" | "docked" = "modal"): void {
+  openFilePicker(): void {
     new RapidReaderFileSuggestModal(this.app, async (file) => {
       const rawText = await this.app.vault.read(file);
-      this.openFromText({ path: file.path, name: file.name, rawText }, target);
+      this.openFromText({ path: file.path, name: file.name, rawText });
     }).open();
   }
 
-  async openForCurrentFile(target: "modal" | "docked" = "modal"): Promise<void> {
+  async openForCurrentFile(): Promise<void> {
     const activeFile = this.app.workspace.getActiveFile();
     if (!activeFile) {
       new Notice("No active file found.");
@@ -161,25 +143,20 @@ export default class RapidReaderPlugin extends Plugin {
         path: activeFile.path,
         name: `${activeFile.name} (selection)`,
         rawText: selected
-      }, target);
+      });
       return;
     }
 
     const rawText = await this.app.vault.read(activeFile);
-    await this.openFromText({ path: activeFile.path, name: activeFile.name, rawText }, target);
+    await this.openFromText({ path: activeFile.path, name: activeFile.name, rawText });
   }
 
-
-  openPreparedSession(session: ReaderSession, target: "modal" | "docked"): void {
-    if (target === "docked") {
-      this.openInDockedView(session);
-      return;
-    }
-    new RapidReaderModal(this, session).open();
+  openPreparedSession(session: ReaderSession): void {
+    this.openInTabView(session);
   }
 
-  private async openInDockedView(session: ReaderSession): Promise<void> {
-    const leaf = this.app.workspace.getRightLeaf(false);
+  private async openInTabView(session: ReaderSession): Promise<void> {
+    const leaf = this.app.workspace.getLeaf("tab");
     if (!leaf) return;
     await leaf.setViewState({ type: RAPID_READER_DOCKED_VIEW, active: true });
     this.app.workspace.revealLeaf(leaf);
@@ -196,7 +173,7 @@ export default class RapidReaderPlugin extends Plugin {
     return selection.trim().length > 0 ? selection : null;
   }
 
-  async openFromText(source: SourcePayload, target: "modal" | "docked" = "modal"): Promise<void> {
+  async openFromText(source: SourcePayload): Promise<void> {
     const cleanedText = cleanMarkdownText(source.rawText, this.settings);
     const simplified = simplifyText(source.rawText, this.settings);
     const analysis = analyzeReadability(source.rawText);
@@ -219,7 +196,7 @@ export default class RapidReaderPlugin extends Plugin {
         tokens,
         simplifiedTokens,
         initialIndex: remembered
-      }, target);
+      });
     };
 
     if (this.settings.warnLowReadability && analysis.shouldWarn) {

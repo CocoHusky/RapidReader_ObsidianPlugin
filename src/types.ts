@@ -22,8 +22,6 @@ export interface RapidReaderSettings {
   lastWpm: number;
   progressByPath: Record<string, number>;
   sidePanelOpenByDefault?: boolean;
-  defaultOpenMode: "modal" | "docked";
-  fullWidthModal: boolean;
 }
 
 export interface ReaderToken {
@@ -48,6 +46,18 @@ export interface ReadabilityAnalysis {
   proseRatio: number;
   issues: string[];
   shouldWarn: boolean;
+}
+
+
+export interface ReaderSession {
+  sourceName: string;
+  sourcePath: string;
+  text: string;
+  simplifiedText: string;
+  useSimplified: boolean;
+  tokens: ReaderToken[];
+  simplifiedTokens: ReaderToken[];
+  initialIndex: number;
 }
 
 export interface PreparedReaderContent {

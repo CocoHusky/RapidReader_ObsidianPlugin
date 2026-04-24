@@ -2,7 +2,7 @@ import { ItemView, Notice, WorkspaceLeaf, setIcon } from "obsidian";
 import type RapidReaderPlugin from "./main";
 import { splitWordByOrp } from "./orp";
 import { calculateDelay, estimateRemainingMs } from "./timing";
-import { ReaderSession } from "./readerModal";
+import { ReaderSession } from "./types";
 
 export const RAPID_READER_DOCKED_VIEW = "rapid-reader-docked-view";
 
@@ -13,7 +13,6 @@ export class RapidReaderDockedView extends ItemView {
   private index = 0;
   private playing = false;
   private timeoutId: number | null = null;
-  private keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
   private headerInfoEl!: HTMLElement;
   private wordBeforeEl!: HTMLElement;
@@ -49,13 +48,11 @@ export class RapidReaderDockedView extends ItemView {
     this.containerEl.empty();
     this.containerEl.addClass("rapid-reader-docked-root");
     this.wpm = this.plugin.settings.lastWpm || this.plugin.settings.defaultWpm;
-    this.attachHotkeys();
     this.renderShell();
   }
 
   async onClose(): Promise<void> {
     this.stop();
-    if (this.keyHandler) this.containerEl.removeEventListener("keydown", this.keyHandler, true);
   }
 
   setSession(session: ReaderSession): void {
@@ -63,25 +60,9 @@ export class RapidReaderDockedView extends ItemView {
     this.tokens = session.useSimplified ? session.simplifiedTokens : session.tokens;
     this.index = Math.max(0, Math.min(session.initialIndex, this.tokens.length - 1));
     this.wpm = this.plugin.settings.lastWpm || this.plugin.settings.defaultWpm;
-    this.attachHotkeys();
     this.renderShell();
     this.renderSidePanel();
     this.renderCurrentWord();
-  }
-
-
-  private attachHotkeys(): void {
-    if (this.keyHandler) this.containerEl.removeEventListener("keydown", this.keyHandler, true);
-    this.containerEl.tabIndex = -1;
-    this.containerEl.focus();
-    this.keyHandler = (e: KeyboardEvent) => {
-      const handled = this.handleKeydown(e);
-      if (handled) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-    this.containerEl.addEventListener("keydown", this.keyHandler, true);
   }
 
   private emptyTokens() {
@@ -98,12 +79,6 @@ export class RapidReaderDockedView extends ItemView {
 
     const topActions = top.createDiv({ cls: "rapid-reader-top-actions" });
     this.headerInfoEl = topActions.createDiv({ cls: "rapid-reader-header-info" });
-
-    const modalBtn = topActions.createEl("button", { text: "Open Modal", cls: "rapid-reader-help-btn" });
-    modalBtn.addEventListener("click", () => {
-      if (!this.session) return;
-      this.plugin.openPreparedSession(this.session, "modal");
-    });
 
     const body = root.createDiv({ cls: "rapid-reader-body" });
     const readerPane = body.createDiv({ cls: "rapid-reader-pane" });
@@ -208,21 +183,6 @@ export class RapidReaderDockedView extends ItemView {
 
   private highlightSideParagraph(paragraphIndex: number): void {
     this.sideParagraphEls.forEach((el, idx) => el.toggleClass("is-active", idx === paragraphIndex));
-  }
-
-
-  private handleKeydown(e: KeyboardEvent): boolean {
-    if (e.key === " " || e.code === "Space") return this.togglePlay(), true;
-    if (e.key.toLowerCase() === "r") return this.jumpTo(0), true;
-    if (e.key === "ArrowLeft" && e.shiftKey) return this.move(-10), true;
-    if (e.key === "ArrowRight" && e.shiftKey) return this.move(10), true;
-    if (e.key === "ArrowLeft") return this.move(-1), true;
-    if (e.key === "ArrowRight") return this.move(1), true;
-    if (e.key === "ArrowUp") return this.setWpm(this.wpm + 25), true;
-    if (e.key === "ArrowDown") return this.setWpm(this.wpm - 25), true;
-    if (e.key === "[") return this.setWpm(this.wpm - 50), true;
-    if (e.key === "]") return this.setWpm(this.wpm + 50), true;
-    return false;
   }
 
   private move(delta: number): void {

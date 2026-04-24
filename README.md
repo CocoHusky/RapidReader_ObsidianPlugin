@@ -4,8 +4,7 @@ Rapid Reader is a focused popup-style speed-reading plugin for Obsidian. It read
 
 ## Features
 
-- Popup modal reading experience (distraction-free)
-- Docked reader mode (opens in right pane) for users who prefer non-modal layout
+- Tabbed docked reader mode (graph-view-style tab that can be detached)
 - ORP-aligned one-word display with configurable center guide
 - Long-word-aware word rendering to reduce clipping/shifting on very long tokens
 - Reads selected editor text or current file content
@@ -14,7 +13,6 @@ Rapid Reader is a focused popup-style speed-reading plugin for Obsidian. It read
 - Deterministic text cleanup and simplify pipeline
 - Side panel with cleaned full text and live paragraph highlight
 - Playback controls: restart, step, jump ±10, speed slider, progress slider
-- Keyboard shortcuts inside modal
 - Persistent settings and remembered position per file
 - Speed shown as `w/min` below the speed slider and reading progress shown as `current/total`
 
@@ -57,25 +55,7 @@ npm run build
 - **Open Rapid Reader for current file**
 - **Choose file for Rapid Reader**
 - **Open Rapid Reader settings**
-- **Open Rapid Reader for current file (Docked)**
-- **Choose file for Rapid Reader (Docked)**
-- Left-ribbon button opens a quick choice: current file or choose another file (uses default open mode setting)
-
-## Keyboard shortcuts (inside reader modal)
-
-- `Space`: Play/Pause
-- `Left`: Previous word
-- `Right`: Next word
-- `Shift + Left`: Back 10 words
-- `Shift + Right`: Forward 10 words
-- `Up`: +25 WPM
-- `Down`: -25 WPM
-- `[`: -50 WPM
-- `]`: +50 WPM
-- `R`: Restart
-- `H`: Open help
-- `,`: Open settings tab
-- `Esc`: Close reader
+- Left-ribbon button opens a quick choice: current file or choose another file
 
 ## Settings
 
@@ -88,8 +68,6 @@ npm run build
 - Text color override
 - Background color override
 - Reader width
-- Default open mode (Modal or Docked)
-- Use full-width modal sizing
 - Show center guide
 - Show full text side panel by default
 - Punctuation pause strength (`off/light/normal/strong`)
@@ -109,21 +87,20 @@ npm run build
 5. Confirm preflight warning appears for code-heavy or list-heavy notes.
 6. Click Simplify and verify cleaned text still reads.
 7. Click Continue and verify it opens without simplifying.
-8. Click Cancel and verify modal closes.
-9. Press Space to play/pause.
-10. Use left/right arrows for previous/next word.
-11. Use Shift + arrows for 10-word jumps.
-12. Use up/down arrows to adjust speed.
-13. Verify ORP letter stays centered.
-14. Verify full text side panel scrolls with the current reading position.
-15. Verify settings persist after reload.
-16. Verify plugin unload leaves no running timers.
+8. Click Cancel and verify reader does not open.
+9. Use the Play/Pause button to control playback.
+10. Use Prev/Next and Back 10/Forward 10 buttons.
+11. Use the speed slider and confirm speed updates.
+12. Verify ORP letter stays centered.
+13. Verify full text side panel scrolls with the current reading position.
+14. Verify settings persist after reload.
+15. Verify plugin unload leaves no running timers.
 
 ## Roadmap
 
 - PDF support later
 - Better Markdown parsing later
-- Optional docked/tab view later
+- Advanced split/layout presets later
 - Optional LLM summary mode later (not in version 1)
 
 ## Security notes

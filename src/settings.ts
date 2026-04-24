@@ -23,9 +23,7 @@ export const DEFAULT_SETTINGS: RapidReaderSettings = {
   warnLowReadability: true,
   lastWpm: 500,
   progressByPath: {},
-  sidePanelOpenByDefault: true,
-  defaultOpenMode: "modal",
-  fullWidthModal: true
+  sidePanelOpenByDefault: true
 };
 
 export class RapidReaderSettingTab extends PluginSettingTab {
@@ -87,16 +85,6 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
-
-    new Setting(containerEl).setName("Default open mode").setDesc("Choose whether Rapid Reader opens as a popup modal or a docked pane by default.").addDropdown((d) => d.addOption("modal", "Modal popup").addOption("docked", "Docked pane").setValue(this.plugin.settings.defaultOpenMode).onChange(async (value: "modal" | "docked") => {
-      this.plugin.settings.defaultOpenMode = value;
-      await this.plugin.saveSettings();
-    }));
-
-    new Setting(containerEl).setName("Use full-width modal sizing").setDesc("Makes the popup modal use most of the available app width/height.").addToggle((tg) => tg.setValue(this.plugin.settings.fullWidthModal).onChange(async (value) => {
-      this.plugin.settings.fullWidthModal = value;
-      await this.plugin.saveSettings();
-    }));
     new Setting(containerEl).setName("Show center guide").addToggle((tg) => tg.setValue(this.plugin.settings.showCenterGuide).onChange(async (value) => {
       this.plugin.settings.showCenterGuide = value;
       await this.plugin.saveSettings();
