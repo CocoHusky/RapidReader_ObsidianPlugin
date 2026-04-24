@@ -1,0 +1,25 @@
+{
+  "name": "rapid-reader-obsidian-plugin",
+  "version": "0.1.0",
+  "description": "Rapid Reader Obsidian plugin",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "speed-reading"
+  ],
+  "author": "Rapid Reader Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.17.57",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.25.4",
+    "obsidian": "latest",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  }
+}
