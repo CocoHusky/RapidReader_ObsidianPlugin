@@ -14,6 +14,7 @@ Rapid Reader is a focused popup-style speed-reading plugin for Obsidian. It read
 - Playback controls: restart, step, jump ±10, speed slider, progress slider
 - Keyboard shortcuts inside modal
 - Persistent settings and remembered position per file
+- Speed shown as `w/min` below the speed slider and reading progress shown as `current/total`
 
 ## Version 1 limitations
 
@@ -54,6 +55,7 @@ npm run build
 - **Open Rapid Reader for current file**
 - **Choose file for Rapid Reader**
 - **Open Rapid Reader settings**
+- Left-ribbon button opens a quick choice: current file or choose another file
 
 ## Keyboard shortcuts (inside reader modal)
 
@@ -66,6 +68,9 @@ npm run build
 - `Down`: -25 WPM
 - `[`: -50 WPM
 - `]`: +50 WPM
+- `R`: Restart
+- `H`: Open help
+- `,`: Open settings tab
 - `Esc`: Close reader
 
 ## Settings

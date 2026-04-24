@@ -1,6 +1,6 @@
 .rapid-reader-modal-wrap .modal {
-  width: min(96vw, 1200px);
-  max-width: 1200px;
+  width: min(98vw, 1900px);
+  max-width: 1900px;
 }
 
 .rapid-reader-modal {
@@ -11,8 +11,11 @@
   --rapid-reader-font-family: inherit;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-height: 86vh;
+  gap: 10px;
+  height: 58vh;
+  max-height: 58vh;
+  overflow: hidden;
+  width: min(95vw, 1800px);
   color: var(--rapid-reader-text-color);
   background: var(--rapid-reader-bg-color);
 }
@@ -22,13 +25,26 @@
   justify-content: space-between;
   gap: 12px;
   font-size: 0.9em;
+  align-items: center;
+}
+
+.rapid-reader-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rapid-reader-help-btn {
+  font-size: 11px;
+  padding: 2px 8px;
 }
 
 .rapid-reader-body {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  min-height: 380px;
-  gap: 12px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+  gap: 10px;
 }
 
 .rapid-reader-pane {
@@ -38,7 +54,8 @@
   justify-content: center;
   border: 1px solid var(--background-modifier-border);
   border-radius: 10px;
-  padding: 20px;
+  padding: 12px;
+  min-height: 0;
 }
 
 .rapid-reader-display {
@@ -53,6 +70,8 @@
 
 .rapid-reader-word {
   white-space: pre;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .rapid-reader-word-before {
@@ -79,18 +98,20 @@
   left: 50%;
   transform: translateX(-50%);
   width: 2px;
-  height: 18px;
+  height: 14px;
   background: var(--interactive-accent);
   opacity: 0.4;
 }
-.rapid-reader-guide-top { top: 8px; }
-.rapid-reader-guide-bottom { bottom: 8px; }
+
+.rapid-reader-guide-top { top: 6px; }
+.rapid-reader-guide-bottom { bottom: 6px; }
 
 .rapid-reader-side {
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
-  padding: 10px;
+  padding: 8px;
   overflow: auto;
+  min-height: 0;
 }
 
 .rapid-reader-side.is-collapsed {
@@ -101,6 +122,7 @@
   cursor: pointer;
   border-radius: 6px;
   padding: 6px;
+  margin: 0 0 4px 0;
 }
 
 .rapid-reader-paragraph.is-active {
@@ -110,16 +132,28 @@
 .rapid-reader-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
+.rapid-reader-controls-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.rapid-reader-meta-item {
+  min-width: 120px;
+}
+
 .rapid-reader-btn {
-  padding: 6px 10px;
+  padding: 4px 8px;
 }
 
 .rapid-reader-progress {
-  width: min(460px, 100%);
+  width: min(520px, 100%);
   flex: 1;
 }
 

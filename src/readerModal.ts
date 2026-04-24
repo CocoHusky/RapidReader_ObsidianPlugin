@@ -15,6 +15,36 @@ interface ReaderSession {
   initialIndex: number;
 }
 
+class RapidReaderHelpModal extends Modal {
+  onOpen(): void {
+    this.contentEl.empty();
+    this.contentEl.createEl("h3", { text: "Rapid Reader keyboard shortcuts" });
+    const list = this.contentEl.createEl("ul");
+
+    const shortcuts = [
+      ["Space", "Play / Pause"],
+      ["R", "Restart"],
+      ["Left Arrow", "Previous word"],
+      ["Right Arrow", "Next word"],
+      ["Shift + Left", "Back 10 words"],
+      ["Shift + Right", "Forward 10 words"],
+      ["Up Arrow", "Increase speed by 25 WPM"],
+      ["Down Arrow", "Decrease speed by 25 WPM"],
+      ["[", "Decrease speed by 50 WPM"],
+      ["]", "Increase speed by 50 WPM"],
+      ["H", "Open help"],
+      [",", "Open settings"],
+      ["Escape", "Close reader"]
+    ];
+
+    shortcuts.forEach(([keys, action]) => {
+      const li = list.createEl("li");
+      li.createSpan({ text: `${keys}: ` });
+      li.createSpan({ text: action });
+    });
+  }
+}
+
 export class RapidReaderModal extends Modal {
   private plugin: RapidReaderPlugin;
   private session: ReaderSession;
@@ -34,6 +64,9 @@ export class RapidReaderModal extends Modal {
   private progressEl!: HTMLInputElement;
   private speedEl!: HTMLInputElement;
   private sidePanelEl!: HTMLElement;
+  private playPauseBtn!: HTMLButtonElement;
+  private speedInfoEl!: HTMLElement;
+  private progressInfoEl!: HTMLElement;
   private sideParagraphEls: HTMLElement[] = [];
 
   constructor(plugin: RapidReaderPlugin, session: ReaderSession) {
@@ -53,6 +86,7 @@ export class RapidReaderModal extends Modal {
     this.renderSidePanel();
     this.renderCurrentWord();
     this.applyTheme();
+    this.updatePlayPauseButton();
     if (this.plugin.settings.autoplay) this.play();
   }
 
@@ -64,11 +98,19 @@ export class RapidReaderModal extends Modal {
 
   private buildLayout(): void {
     const root = this.contentEl.createDiv({ cls: "rapid-reader-modal" });
-    root.style.maxWidth = `${this.plugin.settings.readerWidth}px`;
+    root.style.width = `${this.plugin.settings.readerWidth}px`;
 
     const top = root.createDiv({ cls: "rapid-reader-top" });
     top.createDiv({ text: this.session.sourceName, cls: "rapid-reader-filename" });
-    this.headerInfoEl = top.createDiv({ cls: "rapid-reader-header-info" });
+
+    const topActions = top.createDiv({ cls: "rapid-reader-top-actions" });
+    this.headerInfoEl = topActions.createDiv({ cls: "rapid-reader-header-info" });
+
+    const helpBtn = topActions.createEl("button", { text: "HELP", cls: "rapid-reader-help-btn" });
+    helpBtn.addEventListener("click", () => new RapidReaderHelpModal(this.app).open());
+
+    const configBtn = topActions.createEl("button", { text: "Config", cls: "rapid-reader-help-btn" });
+    configBtn.addEventListener("click", () => this.app.setting.openTabById(this.plugin.manifest.id));
 
     const body = root.createDiv({ cls: "rapid-reader-body" });
     const readerPane = body.createDiv({ cls: "rapid-reader-pane" });
@@ -81,13 +123,10 @@ export class RapidReaderModal extends Modal {
       guideBottom.hide();
     }
 
-    const before = display.createDiv({ cls: "rapid-reader-word rapid-reader-word-before" });
+    this.wordBeforeEl = display.createDiv({ cls: "rapid-reader-word rapid-reader-word-before" });
     const pivotCol = display.createDiv({ cls: "rapid-reader-orp-col" });
-    const after = display.createDiv({ cls: "rapid-reader-word rapid-reader-word-after" });
-
-    this.wordBeforeEl = before;
     this.wordOrpEl = pivotCol.createSpan({ cls: "rapid-reader-word-orp" });
-    this.wordAfterEl = after;
+    this.wordAfterEl = display.createDiv({ cls: "rapid-reader-word rapid-reader-word-after" });
 
     this.sidePanelEl = body.createDiv({ cls: "rapid-reader-side" });
     this.sidePanelEl.toggleClass("is-collapsed", !this.sidePanelOpen);
@@ -107,11 +146,10 @@ export class RapidReaderModal extends Modal {
     btn("Restart", () => this.jumpTo(0));
     btn("Back 10", () => this.move(-10));
     btn("Prev", () => this.move(-1));
-    const playBtn = btn("Play/Pause", () => this.togglePlay(), "play");
+    this.playPauseBtn = btn("Play/Pause", () => this.togglePlay(), "play") as HTMLButtonElement;
     btn("Next", () => this.move(1));
     btn("Forward 10", () => this.move(10));
-
-    const sideToggle = btn("Show/Hide text", () => {
+    btn("Show/Hide text", () => {
       this.sidePanelOpen = !this.sidePanelOpen;
       this.sidePanelEl.toggleClass("is-collapsed", !this.sidePanelOpen);
     });
@@ -130,9 +168,13 @@ export class RapidReaderModal extends Modal {
     this.progressEl.value = String(this.index);
     this.progressEl.addEventListener("input", () => this.jumpTo(Number(this.progressEl.value)));
 
+    const controlsMeta = root.createDiv({ cls: "rapid-reader-controls-meta" });
+    this.speedInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
+    this.progressInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
+
     this.keyHandler = (e: KeyboardEvent) => {
       if (!this.isOpen()) return;
-      const handled = this.handleKeydown(e, playBtn, sideToggle);
+      const handled = this.handleKeydown(e);
       if (handled) {
         e.preventDefault();
         e.stopPropagation();
@@ -142,8 +184,11 @@ export class RapidReaderModal extends Modal {
     window.addEventListener("keydown", this.keyHandler, true);
   }
 
-  private handleKeydown(e: KeyboardEvent, _playBtn: HTMLElement, _toggleBtn: HTMLElement): boolean {
+  private handleKeydown(e: KeyboardEvent): boolean {
     if (e.key === " ") return this.togglePlay(), true;
+    if (e.key.toLowerCase() === "r") return this.jumpTo(0), true;
+    if (e.key.toLowerCase() === "h") return new RapidReaderHelpModal(this.app).open(), true;
+    if (e.key === ",") return this.app.setting.openTabById(this.plugin.manifest.id), true;
     if (e.key === "ArrowLeft" && e.shiftKey) return this.move(-10), true;
     if (e.key === "ArrowRight" && e.shiftKey) return this.move(10), true;
     if (e.key === "ArrowLeft") return this.move(-1), true;
@@ -197,6 +242,8 @@ export class RapidReaderModal extends Modal {
     const minutes = Math.floor(etaMs / 60000);
     const seconds = Math.floor((etaMs % 60000) / 1000);
     this.headerInfoEl.setText(`${this.wpm} WPM • ${current} / ${total} • ${minutes}:${String(seconds).padStart(2, "0")} remaining`);
+    if (this.speedInfoEl) this.speedInfoEl.setText(`${this.wpm} w/min`);
+    if (this.progressInfoEl) this.progressInfoEl.setText(`${current}/${total}`);
   }
 
   private move(delta: number): void {
@@ -235,6 +282,20 @@ export class RapidReaderModal extends Modal {
     else this.play();
   }
 
+  private updatePlayPauseButton(): void {
+    if (!this.playPauseBtn) return;
+    this.playPauseBtn.empty();
+    if (this.playing) {
+      setIcon(this.playPauseBtn, "pause");
+      this.playPauseBtn.setAttribute("aria-label", "Pause");
+      this.playPauseBtn.setAttribute("title", "Pause");
+    } else {
+      setIcon(this.playPauseBtn, "play");
+      this.playPauseBtn.setAttribute("aria-label", "Play");
+      this.playPauseBtn.setAttribute("title", "Play");
+    }
+  }
+
   private play(): void {
     if (!this.tokens.length) {
       new Notice("No readable tokens found.");
@@ -242,11 +303,13 @@ export class RapidReaderModal extends Modal {
     }
     this.stop();
     this.playing = true;
+    this.updatePlayPauseButton();
     this.timeoutId = window.setTimeout(this.tick, 60000 / this.wpm);
   }
 
   private stop(): void {
     this.playing = false;
+    this.updatePlayPauseButton();
     if (this.timeoutId !== null) {
       window.clearTimeout(this.timeoutId);
       this.timeoutId = null;

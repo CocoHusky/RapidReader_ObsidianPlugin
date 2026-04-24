@@ -14,7 +14,7 @@ export function calculateDelay(token: ReaderToken, nextToken: ReaderToken | unde
   let mult = 1;
 
   if (/[,:;]$/.test(token.text)) mult *= profile.short;
-  if (/[.!?]$/.test(token.text)) mult *= profile.long;
+  if (/\.$/.test(token.text)) mult *= profile.long;
   if (nextToken && nextToken.paragraphIndex > token.paragraphIndex) mult *= profile.paragraph;
 
   const stripped = token.text.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");

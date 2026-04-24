@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS: RapidReaderSettings = {
   orpColor: "#ff4d4f",
   textColor: "",
   backgroundColor: "",
-  readerWidth: 1000,
+  readerWidth: 1600,
   showCenterGuide: true,
   showSidePanelDefault: true,
   punctuationPause: "normal",
@@ -81,7 +81,7 @@ export class RapidReaderSettingTab extends PluginSettingTab {
     }));
 
     new Setting(containerEl).setName("Reader width (px)").addText((t) => t.setValue(String(this.plugin.settings.readerWidth)).onChange(async (value) => {
-      this.plugin.settings.readerWidth = Math.max(700, Number(value) || 1000);
+      this.plugin.settings.readerWidth = Math.max(900, Number(value) || 1600);
       await this.plugin.saveSettings();
     }));
 

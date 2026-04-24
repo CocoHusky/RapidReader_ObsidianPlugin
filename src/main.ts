@@ -42,12 +42,45 @@ class PreflightModal extends Modal {
   }
 }
 
+
+class RibbonActionModal extends Modal {
+  constructor(
+    app: App,
+    private readonly onCurrent: () => void,
+    private readonly onChoose: () => void
+  ) {
+    super(app);
+  }
+
+  onOpen(): void {
+    this.contentEl.empty();
+    this.contentEl.createEl("h3", { text: "Rapid Reader" });
+    this.contentEl.createEl("p", { text: "Choose how you want to open Rapid Reader." });
+
+    const actions = this.contentEl.createDiv({ cls: "rapid-reader-preflight-buttons" });
+    const currentBtn = actions.createEl("button", { text: "Open current file" });
+    const browseBtn = actions.createEl("button", { text: "Choose another file" });
+
+    currentBtn.addEventListener("click", () => {
+      this.close();
+      this.onCurrent();
+    });
+
+    browseBtn.addEventListener("click", () => {
+      this.close();
+      this.onChoose();
+    });
+  }
+}
+
 export default class RapidReaderPlugin extends Plugin {
   settings: RapidReaderSettings;
 
   async onload(): Promise<void> {
     await this.loadSettings();
-    this.addRibbonIcon("book-open", "Open Rapid Reader", () => this.openForCurrentFile());
+    this.addRibbonIcon("book-open", "Open Rapid Reader", () => {
+      new RibbonActionModal(this.app, () => this.openForCurrentFile(), () => this.openFilePicker()).open();
+    });
 
     this.addCommand({
       id: "rapid-reader-open-current",
@@ -58,12 +91,7 @@ export default class RapidReaderPlugin extends Plugin {
     this.addCommand({
       id: "rapid-reader-pick-file",
       name: "Choose file for Rapid Reader",
-      callback: () => {
-        new RapidReaderFileSuggestModal(this.app, async (file) => {
-          const rawText = await this.app.vault.read(file);
-          this.openFromText({ path: file.path, name: file.name, rawText });
-        }).open();
-      }
+      callback: () => this.openFilePicker()
     });
 
     this.addCommand({
@@ -86,6 +114,14 @@ export default class RapidReaderPlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+
+
+  openFilePicker(): void {
+    new RapidReaderFileSuggestModal(this.app, async (file) => {
+      const rawText = await this.app.vault.read(file);
+      this.openFromText({ path: file.path, name: file.name, rawText });
+    }).open();
   }
 
   async openForCurrentFile(): Promise<void> {
