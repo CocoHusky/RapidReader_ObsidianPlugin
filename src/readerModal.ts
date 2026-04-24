@@ -123,7 +123,7 @@ export class RapidReaderModal extends Modal {
     helpBtn.addEventListener("click", () => new RapidReaderHelpModal(this.app).open());
 
     const configBtn = topActions.createEl("button", { text: "Config", cls: "rapid-reader-help-btn" });
-    configBtn.addEventListener("click", () => this.app.setting.openTabById(this.plugin.manifest.id));
+    configBtn.addEventListener("click", () => this.plugin.openSettingsTab());
 
     const body = root.createDiv({ cls: "rapid-reader-body" });
     const readerPane = body.createDiv({ cls: "rapid-reader-pane" });
@@ -144,7 +144,8 @@ export class RapidReaderModal extends Modal {
     this.sidePanelEl = body.createDiv({ cls: "rapid-reader-side" });
     this.sidePanelEl.toggleClass("is-collapsed", !this.sidePanelOpen);
 
-    const controls = root.createDiv({ cls: "rapid-reader-controls" });
+    const bottomBar = root.createDiv({ cls: "rapid-reader-bottom-bar" });
+    const controls = bottomBar.createDiv({ cls: "rapid-reader-controls" });
 
     const btn = (label: string, action: () => void, icon?: string) => {
       const b = controls.createEl("button", { cls: "rapid-reader-btn", text: label });
@@ -167,23 +168,26 @@ export class RapidReaderModal extends Modal {
       this.sidePanelEl.toggleClass("is-collapsed", !this.sidePanelOpen);
     });
 
-    this.speedEl = controls.createEl("input", { type: "range" });
+    const sliderRow = bottomBar.createDiv({ cls: "rapid-reader-slider-row" });
+    const speedWrap = sliderRow.createDiv({ cls: "rapid-reader-slider-wrap" });
+    this.speedEl = speedWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.speedEl.min = String(this.plugin.settings.minWpm);
     this.speedEl.max = String(this.plugin.getMaxWpm());
     this.speedEl.step = "25";
     this.speedEl.value = String(this.wpm);
     this.speedEl.addEventListener("input", () => this.setWpm(Number(this.speedEl.value)));
 
-    this.progressEl = controls.createEl("input", { type: "range", cls: "rapid-reader-progress" });
+    this.speedInfoEl = speedWrap.createDiv({ cls: "rapid-reader-slider-label" });
+
+    const progressWrap = sliderRow.createDiv({ cls: "rapid-reader-slider-wrap" });
+    this.progressEl = progressWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.progressEl.min = "0";
     this.progressEl.max = String(Math.max(0, this.tokens.length - 1));
     this.progressEl.step = "1";
     this.progressEl.value = String(this.index);
     this.progressEl.addEventListener("input", () => this.jumpTo(Number(this.progressEl.value)));
 
-    const controlsMeta = root.createDiv({ cls: "rapid-reader-controls-meta" });
-    this.speedInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
-    this.progressInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
+    this.progressInfoEl = progressWrap.createDiv({ cls: "rapid-reader-slider-label" });
 
     this.keyHandler = (e: KeyboardEvent) => {
       if (!this.isOpen()) return;
@@ -201,7 +205,7 @@ export class RapidReaderModal extends Modal {
     if (e.key === " " || e.code === "Space") return this.togglePlay(), true;
     if (e.key.toLowerCase() === "r") return this.jumpTo(0), true;
     if (e.key.toLowerCase() === "h") return new RapidReaderHelpModal(this.app).open(), true;
-    if (e.key === ",") return this.app.setting.openTabById(this.plugin.manifest.id), true;
+    if (e.key === ",") return this.plugin.openSettingsTab(), true;
     if (e.key === "ArrowLeft" && e.shiftKey) return this.move(-10), true;
     if (e.key === "ArrowRight" && e.shiftKey) return this.move(10), true;
     if (e.key === "ArrowLeft") return this.move(-1), true;
@@ -299,10 +303,19 @@ export class RapidReaderModal extends Modal {
       this.stop();
       return;
     }
-    const token = this.tokens[this.index];
+    const previousToken = this.tokens[this.index];
     this.move(1);
+    const displayedToken = this.tokens[this.index];
     const next = this.tokens[this.index + 1];
-    const delay = calculateDelay(token, next, this.wpm, this.plugin.settings.punctuationPause);
+    const delay = calculateDelay(
+      displayedToken,
+      next,
+      this.wpm,
+      this.plugin.settings.punctuationPauseMultiplier,
+      this.plugin.settings.sentencePauseMultiplier,
+      this.plugin.settings.paragraphPauseMultiplier,
+      previousToken
+    );
     this.timeoutId = window.setTimeout(this.tick, delay);
   };
 

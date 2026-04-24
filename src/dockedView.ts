@@ -80,7 +80,7 @@ export class RapidReaderDockedView extends ItemView {
     const topActions = top.createDiv({ cls: "rapid-reader-top-actions" });
     this.headerInfoEl = topActions.createDiv({ cls: "rapid-reader-header-info" });
     const configBtn = topActions.createEl("button", { text: "Config", cls: "rapid-reader-help-btn" });
-    configBtn.addEventListener("click", () => this.app.setting.openTabById(this.plugin.manifest.id));
+    configBtn.addEventListener("click", () => this.plugin.openSettingsTab());
 
     const body = root.createDiv({ cls: "rapid-reader-body" });
     const readerPane = body.createDiv({ cls: "rapid-reader-pane" });
@@ -93,7 +93,8 @@ export class RapidReaderDockedView extends ItemView {
 
     this.sidePanelEl = body.createDiv({ cls: "rapid-reader-side" });
 
-    const controls = root.createDiv({ cls: "rapid-reader-controls" });
+    const bottomBar = root.createDiv({ cls: "rapid-reader-bottom-bar" });
+    const controls = bottomBar.createDiv({ cls: "rapid-reader-controls" });
 
     const btn = (label: string, action: () => void, icon?: string) => {
       const b = controls.createEl("button", { cls: "rapid-reader-btn", text: label });
@@ -112,7 +113,7 @@ export class RapidReaderDockedView extends ItemView {
     btn("Next", () => this.move(1));
     btn("Forward 10", () => this.move(10));
 
-    const sliderRow = root.createDiv({ cls: "rapid-reader-slider-row" });
+    const sliderRow = bottomBar.createDiv({ cls: "rapid-reader-slider-row" });
 
     const speedWrap = sliderRow.createDiv({ cls: "rapid-reader-slider-wrap" });
     this.speedEl = speedWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
@@ -210,10 +211,19 @@ export class RapidReaderDockedView extends ItemView {
   private tick = () => {
     if (!this.playing) return;
     if (this.index >= this.tokens.length - 1) return this.stop();
-    const token = this.tokens[this.index];
+    const previousToken = this.tokens[this.index];
     this.move(1);
+    const displayedToken = this.tokens[this.index];
     const next = this.tokens[this.index + 1];
-    const delay = calculateDelay(token, next, this.wpm, this.plugin.settings.punctuationPause, this.plugin.settings.sentencePauseMultiplier);
+    const delay = calculateDelay(
+      displayedToken,
+      next,
+      this.wpm,
+      this.plugin.settings.punctuationPauseMultiplier,
+      this.plugin.settings.sentencePauseMultiplier,
+      this.plugin.settings.paragraphPauseMultiplier,
+      previousToken
+    );
     this.timeoutId = window.setTimeout(this.tick, delay);
   };
 

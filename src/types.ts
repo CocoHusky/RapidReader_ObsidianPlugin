@@ -1,5 +1,3 @@
-export type PunctuationPause = "off" | "light" | "normal" | "strong";
-
 export interface RapidReaderSettings {
   defaultWpm: number;
   minWpm: number;
@@ -10,10 +8,12 @@ export interface RapidReaderSettings {
   textColor: string;
   backgroundColor: string;
   readerWidth: number;
+  fullWidthModal: boolean;
   showCenterGuide: boolean;
   showSidePanelDefault: boolean;
-  punctuationPause: PunctuationPause;
+  punctuationPauseMultiplier: number;
   sentencePauseMultiplier: number;
+  paragraphPauseMultiplier: number;
   replaceCodeBlocks: boolean;
   replaceInlineCode: boolean;
   replaceUrlsOnSimplify: boolean;

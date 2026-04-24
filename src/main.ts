@@ -95,7 +95,7 @@ export default class RapidReaderPlugin extends Plugin {
     this.addCommand({
       id: "rapid-reader-open-settings",
       name: "Open Rapid Reader settings",
-      callback: () => this.app.setting.openTabById(this.manifest.id)
+      callback: () => this.openSettingsTab()
     });
 
     this.addSettingTab(new RapidReaderSettingTab(this.app, this));
@@ -110,12 +110,29 @@ export default class RapidReaderPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const loaded = await this.loadData();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
     if (!this.settings.lastWpm) this.settings.lastWpm = this.settings.defaultWpm;
+
+    const legacyPunctuationPause = (loaded as { punctuationPause?: string } | null)?.punctuationPause;
+    if (typeof legacyPunctuationPause === "string") {
+      const legacyMap: Record<string, number> = {
+        off: 1,
+        light: 1.1,
+        normal: 1.2,
+        strong: 1.35
+      };
+      this.settings.punctuationPauseMultiplier = legacyMap[legacyPunctuationPause] ?? this.settings.punctuationPauseMultiplier;
+    }
   }
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+
+  openSettingsTab(): void {
+    this.app.setting.open();
+    this.app.setting.openTabById(this.manifest.id);
   }
 
   openFilePicker(): void {

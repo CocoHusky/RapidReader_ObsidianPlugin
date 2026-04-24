@@ -93,8 +93,9 @@ npm run build
 - Reader width
 - Show center guide
 - Show full text side panel by default
-- Punctuation pause strength (`off/light/normal/strong`)
-- Sentence pause multiplier (1.0 to 10.0)
+- Punctuation pause multiplier (numeric `1` to `100`, includes decimal numbers like `2.3`)
+- Sentence pause multiplier (numeric `1` to `100`)
+- Paragraph pause multiplier (numeric `1` to `100`)
 - Replace code blocks with `[code block]`
 - Replace inline code with `[code]`
 - Replace URLs with `[link]` during simplify

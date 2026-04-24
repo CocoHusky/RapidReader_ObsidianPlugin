@@ -1,21 +1,45 @@
-import { PunctuationPause, ReaderToken } from "./types";
+import { ReaderToken } from "./types";
 
-const punctuationMap: Record<PunctuationPause, { short: number; long: number; paragraph: number }> = {
-  off: { short: 1, long: 1, paragraph: 1 },
-  light: { short: 1.1, long: 1.25, paragraph: 1.45 },
-  normal: { short: 1.15, long: 1.35, paragraph: 1.65 },
-  strong: { short: 1.25, long: 1.55, paragraph: 1.9 }
-};
+function clampMultiplier(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(1, Math.min(100, value));
+}
 
-export function calculateDelay(token: ReaderToken, nextToken: ReaderToken | undefined, wpm: number, pause: PunctuationPause, sentencePauseMultiplier = 1.6): number {
+function hasSentenceEndingPunctuation(text: string): boolean {
+  return /[.!?](?:["')\]]+)?$/.test(text);
+}
+
+function hasDecimalNumber(text: string): boolean {
+  return /\b\d+\.\d+\b/.test(text);
+}
+
+function hasShortPausePunctuation(text: string): boolean {
+  return /[,;:](?:["')\]]+)?$/.test(text);
+}
+
+export function calculateDelay(
+  token: ReaderToken,
+  nextToken: ReaderToken | undefined,
+  wpm: number,
+  punctuationPauseMultiplier: number,
+  sentencePauseMultiplier: number,
+  paragraphPauseMultiplier: number,
+  previousToken?: ReaderToken
+): number {
   const base = 60000 / Math.max(1, wpm);
-  const profile = punctuationMap[pause];
-
   let mult = 1;
 
-  if (/[,:;]$/.test(token.text)) mult *= profile.short;
-  if (/\.$/.test(token.text)) mult *= profile.long * Math.max(1, Math.min(10, sentencePauseMultiplier));
-  if (nextToken && nextToken.paragraphIndex > token.paragraphIndex) mult *= profile.paragraph;
+  const punctMult = clampMultiplier(punctuationPauseMultiplier);
+  const sentenceMult = clampMultiplier(sentencePauseMultiplier);
+  const paragraphMult = clampMultiplier(paragraphPauseMultiplier);
+
+  if (hasShortPausePunctuation(token.text) || hasDecimalNumber(token.text)) mult *= punctMult;
+  if (hasSentenceEndingPunctuation(token.text)) mult *= sentenceMult;
+  if (nextToken && nextToken.paragraphIndex > token.paragraphIndex) mult *= paragraphMult;
+
+  if (previousToken && hasSentenceEndingPunctuation(previousToken.text)) {
+    mult *= sentenceMult;
+  }
 
   const stripped = token.text.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
   if (stripped.length >= 10) mult *= 1.1;

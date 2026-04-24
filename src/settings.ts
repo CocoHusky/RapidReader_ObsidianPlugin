@@ -12,10 +12,12 @@ export const DEFAULT_SETTINGS: RapidReaderSettings = {
   textColor: "",
   backgroundColor: "",
   readerWidth: 1600,
+  fullWidthModal: false,
   showCenterGuide: true,
   showSidePanelDefault: true,
-  punctuationPause: "normal",
-  sentencePauseMultiplier: 1.6,
+  punctuationPauseMultiplier: 1.2,
+  sentencePauseMultiplier: 1.8,
+  paragraphPauseMultiplier: 2.2,
   replaceCodeBlocks: true,
   replaceInlineCode: true,
   replaceUrlsOnSimplify: true,
@@ -44,14 +46,27 @@ export class RapidReaderSettingTab extends PluginSettingTab {
     containerEl.empty();
     containerEl.createEl("h2", { text: "Rapid Reader settings" });
 
-    new Setting(containerEl).setName("Default WPM").addSlider((s) => s.setLimits(100, 1200, 25).setValue(this.plugin.settings.defaultWpm).setDynamicTooltip().onChange(async (value) => {
-      this.plugin.settings.defaultWpm = value;
-      this.plugin.settings.lastWpm = value;
+    const toClampedInt = (value: string, min: number, max: number, fallback: number): number => {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.max(min, Math.min(max, parsed));
+    };
+
+    const toClampedFloat = (value: string, min: number, max: number, fallback: number): number => {
+      const parsed = Number.parseFloat(value);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.max(min, Math.min(max, parsed));
+    };
+
+    new Setting(containerEl).setName("Default WPM").setDesc("Range: 100 to 1200 (step 25).").addText((t) => t.setPlaceholder("500").setValue(String(this.plugin.settings.defaultWpm)).onChange(async (value) => {
+      const clamped = toClampedInt(value, 100, 1200, this.plugin.settings.defaultWpm);
+      this.plugin.settings.defaultWpm = clamped;
+      this.plugin.settings.lastWpm = clamped;
       await this.plugin.saveSettings();
     }));
 
-    new Setting(containerEl).setName("Minimum WPM").addText((t) => t.setValue(String(this.plugin.settings.minWpm)).onChange(async (value) => {
-      this.plugin.settings.minWpm = Math.max(50, Number(value) || 100);
+    new Setting(containerEl).setName("Minimum WPM").setDesc("Range: 50 to 600.").addText((t) => t.setValue(String(this.plugin.settings.minWpm)).onChange(async (value) => {
+      this.plugin.settings.minWpm = toClampedInt(value, 50, 600, this.plugin.settings.minWpm);
       await this.plugin.saveSettings();
     }));
 
@@ -60,8 +75,8 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
-    new Setting(containerEl).setName("Reader font size").addSlider((s) => s.setLimits(24, 96, 1).setValue(this.plugin.settings.fontSize).setDynamicTooltip().onChange(async (value) => {
-      this.plugin.settings.fontSize = value;
+    new Setting(containerEl).setName("Reader font size").setDesc("Range: 24 to 96 px.").addText((t) => t.setPlaceholder("48").setValue(String(this.plugin.settings.fontSize)).onChange(async (value) => {
+      this.plugin.settings.fontSize = toClampedInt(value, 24, 96, this.plugin.settings.fontSize);
       await this.plugin.saveSettings();
     }));
 
@@ -85,8 +100,13 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
-    new Setting(containerEl).setName("Reader width (px)").addText((t) => t.setValue(String(this.plugin.settings.readerWidth)).onChange(async (value) => {
-      this.plugin.settings.readerWidth = Math.max(900, Number(value) || 1600);
+    new Setting(containerEl).setName("Reader width (px)").setDesc("Range: 900 to 2200 px.").addText((t) => t.setValue(String(this.plugin.settings.readerWidth)).onChange(async (value) => {
+      this.plugin.settings.readerWidth = toClampedInt(value, 900, 2200, this.plugin.settings.readerWidth);
+      await this.plugin.saveSettings();
+    }));
+
+    new Setting(containerEl).setName("Use wide reader modal").setDesc("Enable a larger modal layout for big screens.").addToggle((tg) => tg.setValue(this.plugin.settings.fullWidthModal).onChange(async (value) => {
+      this.plugin.settings.fullWidthModal = value;
       await this.plugin.saveSettings();
     }));
 
@@ -100,14 +120,19 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
-    new Setting(containerEl).setName("Punctuation pause").addDropdown((d) => d.addOption("off", "Off").addOption("light", "Light").addOption("normal", "Normal").addOption("strong", "Strong").setValue(this.plugin.settings.punctuationPause).onChange(async (value: any) => {
-      this.plugin.settings.punctuationPause = value;
+    new Setting(containerEl).setName("Punctuation pause multiplier").setDesc("Quantitative value. Range: 1 to 100. Used for commas, colons, semicolons, and decimal numbers like 2.3.").addText((t) => t.setPlaceholder("1.2").setValue(String(this.plugin.settings.punctuationPauseMultiplier)).onChange(async (value) => {
+      this.plugin.settings.punctuationPauseMultiplier = toClampedFloat(value, 1, 100, this.plugin.settings.punctuationPauseMultiplier);
       await this.plugin.saveSettings();
     }));
 
 
-    new Setting(containerEl).setName("Sentence pause multiplier").setDesc("Multiplier applied to delays at sentence endings (.) from 1 to 10.").addSlider((s) => s.setLimits(1, 10, 0.1).setValue(this.plugin.settings.sentencePauseMultiplier).setDynamicTooltip().onChange(async (value) => {
-      this.plugin.settings.sentencePauseMultiplier = value;
+    new Setting(containerEl).setName("Sentence pause multiplier").setDesc("Quantitative value. Range: 1 to 100. Applied after sentence-ending punctuation (. ! ?).").addText((t) => t.setPlaceholder("1.8").setValue(String(this.plugin.settings.sentencePauseMultiplier)).onChange(async (value) => {
+      this.plugin.settings.sentencePauseMultiplier = toClampedFloat(value, 1, 100, this.plugin.settings.sentencePauseMultiplier);
+      await this.plugin.saveSettings();
+    }));
+
+    new Setting(containerEl).setName("Paragraph pause multiplier").setDesc("Quantitative value. Range: 1 to 100. Applied at paragraph boundaries.").addText((t) => t.setPlaceholder("2.2").setValue(String(this.plugin.settings.paragraphPauseMultiplier)).onChange(async (value) => {
+      this.plugin.settings.paragraphPauseMultiplier = toClampedFloat(value, 1, 100, this.plugin.settings.paragraphPauseMultiplier);
       await this.plugin.saveSettings();
     }));
     new Setting(containerEl).setName("Replace code blocks").addToggle((tg) => tg.setValue(this.plugin.settings.replaceCodeBlocks).onChange(async (value) => {
