@@ -1,0 +1,9 @@
+{
+  "id": "rapid-reader",
+  "name": "Rapid Reader",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Focused popup speed-reader for Markdown and text files with ORP highlighting.",
+  "author": "Rapid Reader Contributors",
+  "isDesktopOnly": false
+}

@@ -1,0 +1,9 @@
+node_modules/
+main.js
+*.map
+
+# Never include agent instruction files in this plugin repo
+AGENTS.md
+Agent.md
+**/AGENTS.md
+**/Agent.md
