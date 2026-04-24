@@ -6,6 +6,7 @@ Rapid Reader is a focused popup-style speed-reading plugin for Obsidian. It read
 
 - Popup modal reading experience (distraction-free)
 - ORP-aligned one-word display with configurable center guide
+- Long-word-aware word rendering to reduce clipping/shifting on very long tokens
 - Reads selected editor text or current file content
 - File picker for `.md`, `.txt`, and README-like files
 - Readability preflight warning flow with Simplify / Continue / Cancel

@@ -223,6 +223,7 @@ export class RapidReaderModal extends Modal {
     this.wordBeforeEl.setText(parts.before);
     this.wordOrpEl.setText(parts.orp);
     this.wordAfterEl.setText(parts.after);
+    this.updateWordScale(token.text);
 
     this.progressEl.value = String(this.index);
     this.updateHeader();
@@ -232,6 +233,21 @@ export class RapidReaderModal extends Modal {
       this.plugin.settings.progressByPath[this.session.sourcePath] = this.index;
       this.plugin.saveSettings();
     }
+  }
+
+
+  private updateWordScale(word: string): void {
+    const root = this.contentEl.querySelector(".rapid-reader-modal") as HTMLElement | null;
+    if (!root) return;
+
+    const core = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+    const length = Math.max(1, core.length);
+
+    let factor = 1;
+    if (length > 12) factor = Math.max(0.62, 12 / length);
+    if (length > 20) factor = Math.max(0.5, 10 / length);
+
+    root.style.setProperty("--rapid-reader-active-font-size", `calc(var(--rapid-reader-font-size) * ${factor.toFixed(3)})`);
   }
 
   private updateHeader(): void {
