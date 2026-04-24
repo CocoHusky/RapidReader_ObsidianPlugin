@@ -110,23 +110,23 @@ export class RapidReaderDockedView extends ItemView {
     btn("Next", () => this.move(1));
     btn("Forward 10", () => this.move(10));
 
-    this.speedEl = controls.createEl("input", { type: "range" });
+    const speedWrap = root.createDiv({ cls: "rapid-reader-slider-wrap" });
+    this.speedEl = speedWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.speedEl.min = String(this.plugin.settings.minWpm);
     this.speedEl.max = String(this.plugin.getMaxWpm());
     this.speedEl.step = "25";
     this.speedEl.value = String(this.wpm);
     this.speedEl.addEventListener("input", () => this.setWpm(Number(this.speedEl.value)));
+    this.speedInfoEl = speedWrap.createDiv({ cls: "rapid-reader-slider-label" });
 
-    this.progressEl = controls.createEl("input", { type: "range", cls: "rapid-reader-progress" });
+    const progressWrap = root.createDiv({ cls: "rapid-reader-slider-wrap" });
+    this.progressEl = progressWrap.createEl("input", { type: "range", cls: "rapid-reader-progress" });
     this.progressEl.min = "0";
     this.progressEl.max = String(Math.max(0, this.tokens.length - 1));
     this.progressEl.step = "1";
     this.progressEl.value = String(this.index);
     this.progressEl.addEventListener("input", () => this.jumpTo(Number(this.progressEl.value)));
-
-    const controlsMeta = root.createDiv({ cls: "rapid-reader-controls-meta" });
-    this.speedInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
-    this.progressInfoEl = controlsMeta.createDiv({ cls: "rapid-reader-meta-item" });
+    this.progressInfoEl = progressWrap.createDiv({ cls: "rapid-reader-slider-label" });
 
     this.applyTheme(root);
     this.updateHeader();
@@ -160,7 +160,7 @@ export class RapidReaderDockedView extends ItemView {
     const etaMs = estimateRemainingMs(remaining, this.wpm);
     const minutes = Math.floor(etaMs / 60000);
     const seconds = Math.floor((etaMs % 60000) / 1000);
-    this.headerInfoEl?.setText(`${this.wpm} WPM • ${current} / ${total} • ${minutes}:${String(seconds).padStart(2, "0")}`);
+    this.headerInfoEl?.setText(`${minutes}:${String(seconds).padStart(2, "0")} remaining`);
     this.speedInfoEl?.setText(`${this.wpm} w/min`);
     this.progressInfoEl?.setText(`${current}/${total}`);
   }

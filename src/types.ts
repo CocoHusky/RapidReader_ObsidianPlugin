@@ -22,6 +22,11 @@ export interface RapidReaderSettings {
   lastWpm: number;
   progressByPath: Record<string, number>;
   sidePanelOpenByDefault?: boolean;
+
+  cleanupLinks: boolean;
+  cleanupSymbols: boolean;
+  splitHyphenatedWords: boolean;
+  stripNumericCitations: boolean;
 }
 
 export interface ReaderToken {

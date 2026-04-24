@@ -2,9 +2,9 @@ import { PunctuationPause, ReaderToken } from "./types";
 
 const punctuationMap: Record<PunctuationPause, { short: number; long: number; paragraph: number }> = {
   off: { short: 1, long: 1, paragraph: 1 },
-  light: { short: 1.12, long: 1.3, paragraph: 1.5 },
-  normal: { short: 1.2, long: 1.5, paragraph: 1.8 },
-  strong: { short: 1.35, long: 1.75, paragraph: 2.2 }
+  light: { short: 1.1, long: 1.25, paragraph: 1.45 },
+  normal: { short: 1.15, long: 1.35, paragraph: 1.65 },
+  strong: { short: 1.25, long: 1.55, paragraph: 1.9 }
 };
 
 export function calculateDelay(token: ReaderToken, nextToken: ReaderToken | undefined, wpm: number, pause: PunctuationPause): number {

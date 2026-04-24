@@ -69,13 +69,49 @@ function normalizeParagraphWhitespace(text: string): string {
     .trim();
 }
 
+
+function applyReaderNormalization(text: string, settings: RapidReaderSettings): string {
+  let out = text;
+
+  if (settings.stripNumericCitations) {
+    out = out.replace(/\[(\d{1,4})\]\([^\)]*\)/g, "");
+    out = out.replace(/\[(\d{1,4})\]/g, "");
+  }
+
+  if (settings.cleanupLinks) {
+    out = out.replace(/https?:\/\/\S+/g, "");
+    out = out.replace(/doi:\s*\S+/gi, "");
+  }
+
+  if (settings.splitHyphenatedWords) {
+    out = out.replace(/(?<=\p{L})-(?=\p{L})/gu, " ");
+  }
+
+  out = out.replace(/\((\s*[A-Za-z]{1,10}\s*)\)/g, "$1");
+  out = out.replace(/\((\s*[><±\d][^\)]*)\)/g, "$1");
+
+  if (settings.cleanupSymbols) {
+    out = out
+      .replace(/[“”"'`~]/g, "")
+      .replace(/[\[\]{}]/g, "")
+      .replace(/[()]/g, " ")
+      .replace(/\s+([,.;:!?])/g, "$1");
+  }
+
+  out = out.replace(/\s{2,}/g, " ");
+  return out;
+}
+
 function stripMarkdownCommon(text: string, settings: RapidReaderSettings, forSimplify: boolean): string {
   let out = text;
 
   out = out.replace(/```[\s\S]*?```/g, settings.replaceCodeBlocks ? "\n[code block]\n" : "\n");
 
   out = out.replace(/!\[[^\]]*\]\([^\)]+\)/g, "[image]");
-  out = out.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, "$1");
+  out = out.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (_m, label) => {
+    if (settings.stripNumericCitations && /^\d+$/.test(String(label).trim())) return "";
+    return String(label);
+  });
 
   if (settings.replaceInlineCode) {
     out = out.replace(/`[^`]+`/g, "[code]");
@@ -103,6 +139,7 @@ function stripMarkdownCommon(text: string, settings: RapidReaderSettings, forSim
     out = out.replace(/[\p{S}\p{C}]{4,}/gu, "[information]");
   }
 
+  out = applyReaderNormalization(out, settings);
   return normalizeParagraphWhitespace(out);
 }
 

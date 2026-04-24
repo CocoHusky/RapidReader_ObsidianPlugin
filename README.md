@@ -1,6 +1,6 @@
 # Rapid Reader (Obsidian Plugin)
 
-Rapid Reader is a focused popup-style speed-reading plugin for Obsidian. It reads Markdown and plain text content one token at a time with ORP (Optimal Recognition Point) highlighting.
+Rapid Reader is a focused tabbed speed-reading plugin for Obsidian. It reads Markdown and plain text content one token at a time with ORP (Optimal Recognition Point) highlighting.
 
 ## Features
 
@@ -74,6 +74,10 @@ npm run build
 - Replace code blocks with `[code block]`
 - Replace inline code with `[code]`
 - Replace URLs with `[link]` during simplify
+- Remove links in reader
+- Remove noisy symbols
+- Split hyphenated words
+- Strip numeric citations
 - Autoplay after preflight
 - Remember last position per file
 - Warn before reading low-readability docs
@@ -90,11 +94,12 @@ npm run build
 8. Click Cancel and verify reader does not open.
 9. Use the Play/Pause button to control playback.
 10. Use Prev/Next and Back 10/Forward 10 buttons.
-11. Use the speed slider and confirm speed updates.
-12. Verify ORP letter stays centered.
-13. Verify full text side panel scrolls with the current reading position.
-14. Verify settings persist after reload.
-15. Verify plugin unload leaves no running timers.
+11. Use the speed slider and confirm the centered label below it shows `### w/min`.
+12. Use the progress slider and confirm the centered label below it shows `current/total` word count.
+13. Verify ORP letter stays centered.
+14. Verify full text side panel scrolls with the current reading position.
+15. Verify settings persist after reload.
+16. Verify plugin unload leaves no running timers.
 
 ## Roadmap
 

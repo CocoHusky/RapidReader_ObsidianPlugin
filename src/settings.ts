@@ -23,7 +23,11 @@ export const DEFAULT_SETTINGS: RapidReaderSettings = {
   warnLowReadability: true,
   lastWpm: 500,
   progressByPath: {},
-  sidePanelOpenByDefault: true
+  sidePanelOpenByDefault: true,
+  cleanupLinks: true,
+  cleanupSymbols: true,
+  splitHyphenatedWords: true,
+  stripNumericCitations: true
 };
 
 export class RapidReaderSettingTab extends PluginSettingTab {
@@ -115,6 +119,26 @@ export class RapidReaderSettingTab extends PluginSettingTab {
       await this.plugin.saveSettings();
     }));
 
+
+    new Setting(containerEl).setName("Remove links in reader").setDesc("Drop URLs and DOI links from displayed/read tokens.").addToggle((tg) => tg.setValue(this.plugin.settings.cleanupLinks).onChange(async (value) => {
+      this.plugin.settings.cleanupLinks = value;
+      await this.plugin.saveSettings();
+    }));
+
+    new Setting(containerEl).setName("Remove noisy symbols").setDesc("Remove quote/paren/tilde/backtick-style noise during reading cleanup.").addToggle((tg) => tg.setValue(this.plugin.settings.cleanupSymbols).onChange(async (value) => {
+      this.plugin.settings.cleanupSymbols = value;
+      await this.plugin.saveSettings();
+    }));
+
+    new Setting(containerEl).setName("Split hyphenated words").setDesc("Example: macro-electrodes → macro electrodes.").addToggle((tg) => tg.setValue(this.plugin.settings.splitHyphenatedWords).onChange(async (value) => {
+      this.plugin.settings.splitHyphenatedWords = value;
+      await this.plugin.saveSettings();
+    }));
+
+    new Setting(containerEl).setName("Strip numeric citations").setDesc("Remove citation markers like [17] and linked [17](url)." ).addToggle((tg) => tg.setValue(this.plugin.settings.stripNumericCitations).onChange(async (value) => {
+      this.plugin.settings.stripNumericCitations = value;
+      await this.plugin.saveSettings();
+    }));
     new Setting(containerEl).setName("Autoplay after preflight").addToggle((tg) => tg.setValue(this.plugin.settings.autoplay).onChange(async (value) => {
       this.plugin.settings.autoplay = value;
       await this.plugin.saveSettings();
