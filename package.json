@@ -1,6 +1,6 @@
 {
   "name": "rapid-reader-obsidian-plugin",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "description": "Rapid Reader Obsidian plugin",
   "main": "main.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "plugin",
     "speed-reading"
   ],
-  "author": "Rapid Reader Contributors",
+  "author": "Alex Burton",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.17.57",
