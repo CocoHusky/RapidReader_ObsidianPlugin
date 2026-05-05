@@ -126,6 +126,10 @@ npm run build
 15. Verify settings persist after reload.
 16. Verify plugin unload leaves no running timers.
 
+## Plugin Submission Details
+
+https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin
+
 ## Roadmap
 
 - PDF support later
